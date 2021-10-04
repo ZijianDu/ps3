@@ -565,7 +565,7 @@ class Automatic_Corner_Detection(object):
         ddepth= -1
         grad_x = cv2.Sobel(image_bw, ddepth, 1, 0, ksize=3, scale=scale, delta=delta, borderType=cv2.BORDER_DEFAULT)
         grad_y = cv2.Sobel(image_bw, ddepth, 0, 1, ksize=3, scale=scale, delta=delta, borderType=cv2.BORDER_DEFAULT)
-        return grad_x, grad_y
+        return abs(grad_x), abs(grad_y)
 
 
     def get_gaussian(self, ksize, sigma):
