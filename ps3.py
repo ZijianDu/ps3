@@ -747,10 +747,7 @@ class Automatic_Corner_Detection(object):
             y: y indices of the top k corners
         """
         harris_corner_map = self.harris_response_map(image_bw, ksize = 7, sigma = 5, alpha = 0.05)
-        x, y, _, _ = self.nms_maxpool_numpy(harris_corner_map, k, ksize = 27)
-        return x, y
-        ''''
-        # multilevel pooling was used to obtain more interest points on harris corner maps for better matching
+        #x, y, _, _ = self.nms_maxpool_numpy(harris_corner_map, k, ksize = 27)
         combined_x = []
         combined_y = []
         Kernels = [3, 9, 15, 17, 21, 25, 31, 35, 37, 41, 51]
@@ -761,7 +758,7 @@ class Automatic_Corner_Detection(object):
             for j in y:
                 combined_y.append(j)
         return combined_x, combined_y
-        '''
+
 
 
 
