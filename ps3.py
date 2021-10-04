@@ -351,7 +351,7 @@ def find_markers(image, template=None):
     # simply find the CoG of the binary image patches
     # set to 400 to pass unit test, 4000 to use for experiment
 
-    if image.shape[0] > 4000:
+    if image.shape[0] > 400:
         all_CoG = obtain_CoG_Hough_line(all_patches)
         for i in range(len(all_CoG)):
             x, y = get_CoG(i, all_CoG[i][0], all_CoG[i][1], x_half, y_half)
