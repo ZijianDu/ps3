@@ -565,7 +565,7 @@ class Automatic_Corner_Detection(object):
         ddepth= -1
         grad_x = cv2.Sobel(image_bw, ddepth, 1, 0, ksize=3, scale=scale, delta=delta, borderType=cv2.BORDER_DEFAULT)
         grad_y = cv2.Sobel(image_bw, ddepth, 0, 1, ksize=3, scale=scale, delta=delta, borderType=cv2.BORDER_DEFAULT)
-        return abs(grad_x), abs(grad_y)
+        return grad_x, grad_y
 
 
     def get_gaussian(self, ksize, sigma):
@@ -747,7 +747,10 @@ class Automatic_Corner_Detection(object):
             y: y indices of the top k corners
         """
         harris_corner_map = self.harris_response_map(image_bw, ksize = 7, sigma = 5, alpha = 0.05)
-        #x, y, _, _ = self.nms_maxpool_numpy(harris_corner_map, k, ksize = 27)
+        x, y, _, _ = self.nms_maxpool_numpy(harris_corner_map, k, ksize = 27)
+        return x, y
+        ''''
+        # multilevel pooling was used to obtain more interest points on harris corner maps for better matching
         combined_x = []
         combined_y = []
         Kernels = [3, 9, 15, 17, 21, 25, 31, 35, 37, 41, 51]
@@ -758,7 +761,7 @@ class Automatic_Corner_Detection(object):
             for j in y:
                 combined_y.append(j)
         return combined_x, combined_y
-
+        '''
 
 
 
