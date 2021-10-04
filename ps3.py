@@ -70,7 +70,7 @@ class Mouse_Click_Correspondence(object):
             r = self.img[y, x, 2]
             cv2.putText(self.img, str(b) + ',' +
                         str(g) + ',' + str(r),
-                        (x2, y2), font, 1,
+                        (sx1, sy1), font, 1,
                         (255, 255, 0), 2)
             cv2.imshow('image 1', self.img)
 
@@ -856,6 +856,7 @@ class Image_Mosaic(object):
     def image_warp_inv(self, im_src, im_dst, homography):
         #return cv2.warpPerspective(im_dst, im_src, np.linalg.pinv(homography),
         #                           flags = cv2.INTER_LINEAR)
+        pass
 
     def output_mosaic(self, img_src, img_warped):
         stitcher = cv2.Stitcher.create(mode = cv2.Stitcher_PANORAMA)
