@@ -854,8 +854,8 @@ class Image_Mosaic(object):
         pass
     
     def image_warp_inv(self, im_src, im_dst, homography):
-        return cv2.warpPerspective(im_dst, im_src, np.linalg.pinv(homography),
-                                   flags = cv2.INTER_LINEAR)
+        #return cv2.warpPerspective(im_dst, im_src, np.linalg.pinv(homography),
+        #                           flags = cv2.INTER_LINEAR)
 
     def output_mosaic(self, img_src, img_warped):
         stitcher = cv2.Stitcher.create(mode = cv2.Stitcher_PANORAMA)
