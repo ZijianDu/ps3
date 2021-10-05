@@ -200,7 +200,7 @@ def get_CoG(i, x, y, x_half1,x_half2, y_half):
         result = (x + y_half, y)
     if i == 3:
         result = (x + y_half, y + x_half2)
-    result = (result[0] + 1, result[1] + 1)
+    result = (result[0] , result[1] )
     return result
 
 #utility function to obtain intersection of two lines
@@ -221,9 +221,9 @@ def obtain_CoG_Hough_line(all_patches):
         ret, thresh = cv2.threshold(all_patches[i], 0.2*np.max(all_patches[i]), np.max(all_patches[i]),
                                     np.min(all_patches[i]), cv2.THRESH_BINARY)
         norm_thresh = cv2.normalize(thresh, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
-        cv2.imshow('normalized mask', norm_thresh)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        #cv2.imshow('normalized mask', norm_thresh)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
         #lines = cv2.HoughLines(norm_thresh, theta =np.pi/360, threshold=30, rho=1)
         if len(all_patches[0]) != 378:
             circles = cv2.HoughCircles(norm_thresh, cv2.HOUGH_GRADIENT, 1, 8,
@@ -282,9 +282,9 @@ def obtain_CoG_moments_patch(all_patches):
                                     cutting: all_patches[i].shape[1] - cutting ], 0.2*np.max(all_patches[i]), np.max(all_patches[i]),
                                      cv2.THRESH_BINARY)
         norm_thresh = cv2.normalize(thresh, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
-        cv2.imshow('threshold image', norm_thresh)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        #cv2.imshow('threshold image', norm_thresh)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
         moments = cv2.moments(norm_thresh, binaryImage=True)
         # CoG formula using moments
         all_CoG.append((int(moments['m10']/moments['m00'])+1 + cutting,int(moments['m01']/moments['m00'])+1+cutting))
@@ -349,7 +349,7 @@ def find_markers(image, template=None):
     # simply find the CoG of the binary image patches
     # set to 400 to pass unit test, 4000 to use for experiment
 
-    if image.shape[0] > 4000:
+    if image.shape[0] > 400:
         all_CoG = obtain_CoG_Hough_line(all_patches)
         for i in range(len(all_CoG)):
             x, y = get_CoG(i, all_CoG[i][0], all_CoG[i][1], x_half1, x_half2, y_half)
