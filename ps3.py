@@ -182,24 +182,24 @@ def get_corners_list(image):
             (image.shape[1]-1, 0), (image.shape[1]-1, image.shape[0]-1)]
 
 # utility function to cut image into smaller patches
-def cut_patches(corner_normed, x_half, y_half):
-    patch1 = corner_normed[: x_half, : y_half]
-    patch2 = corner_normed[x_half: corner_normed.shape[0], : y_half]
-    patch3 = corner_normed[: x_half, y_half: corner_normed.shape[1]]
-    patch4 = corner_normed[x_half:corner_normed.shape[0], y_half:corner_normed.shape[1]]
+def cut_patches(corner_normed, x_half1, x_half2, y_half):
+    patch1 = corner_normed[: x_half1, : y_half]
+    patch2 = corner_normed[x_half1: corner_normed.shape[0], : y_half]
+    patch3 = corner_normed[: x_half2, y_half: corner_normed.shape[1]]
+    patch4 = corner_normed[x_half2:corner_normed.shape[0], y_half:corner_normed.shape[1]]
     all_patches = [patch1, patch2, patch3, patch4]
     return all_patches
 
 # utility function to get CoG given certain shift
-def get_CoG(i, x, y, x_half, y_half):
+def get_CoG(i, x, y, x_half1,x_half2, y_half):
     if i == 0:
         result = (x, y)
     if i == 1:
-        result = (x, y + x_half)
+        result = (x, y + x_half1)
     if i == 2:
         result = (x + y_half, y)
     if i == 3:
-        result = (x + y_half, y + x_half)
+        result = (x + y_half, y + x_half2)
     result = (result[0] + 1, result[1] + 1)
     return result
 
@@ -282,9 +282,9 @@ def obtain_CoG_moments_patch(all_patches):
                                     cutting: all_patches[i].shape[1] - cutting ], 0.2*np.max(all_patches[i]), np.max(all_patches[i]),
                                      cv2.THRESH_BINARY)
         norm_thresh = cv2.normalize(thresh, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
-        #cv2.imshow('threshold image', norm_thresh)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
+        cv2.imshow('threshold image', norm_thresh)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
         moments = cv2.moments(norm_thresh, binaryImage=True)
         # CoG formula using moments
         all_CoG.append((int(moments['m10']/moments['m00'])+1 + cutting,int(moments['m01']/moments['m00'])+1+cutting))
@@ -306,11 +306,7 @@ def find_markers_template(image, template):
 
 
 
-
-
-
-
-# solving: can not cut into 4 patches
+# solve this: can not simply cut the image into 4 patches
 def find_markers(image, template=None):
     """Finds four corner markers.
 
@@ -330,7 +326,7 @@ def find_markers(image, template=None):
     image_corner = cv2.medianBlur(image, 3)
     image_corner = cv2.GaussianBlur(image_corner, sigmaX= 2, sigmaY= 2, ksize = (5,5))
     ## due to distinct cross feature of the circle to be detected, use harris corner
-    corner = cv2.cornerHarris(image_corner[:,:,0], 3, 3, 5)
+    corner = cv2.cornerHarris(image_corner[:, :, 0], 3, 3, 5)
     off_set = 10
     # normalized corner detection result for better binary image
     corner_normed = cv2.normalize(corner, dst=None, alpha=1, beta=0,
@@ -343,25 +339,27 @@ def find_markers(image, template=None):
     #cv2.waitKey(0)
     #cv2.destroyAllWindows()
     ## try using normalized correlation, directly using correlation would fail
-    # cut the images into patches
-    x_half = int(corner_normed.shape[0]/2)
+    # cut the images into patches, y half will be in middle, x_half1, x_half2 depends on the
+    # CoG of the left and right images
     y_half = int(corner_normed.shape[1]/2)
-    all_patches = cut_patches(corner_normed, x_half,y_half)
+    x_half1 = obtain_CoG_moments_patch([corner_normed[:, 0:y_half]])[0][1]
+    x_half2 = obtain_CoG_moments_patch([corner_normed[:, y_half:corner_normed.shape[1]]])[0][1]
+    all_patches = cut_patches(corner_normed, x_half1, x_half2, y_half)
     shifted_CoG = []
     # simply find the CoG of the binary image patches
     # set to 400 to pass unit test, 4000 to use for experiment
 
-    if image.shape[0] > 400:
+    if image.shape[0] > 4000:
         all_CoG = obtain_CoG_Hough_line(all_patches)
         for i in range(len(all_CoG)):
-            x, y = get_CoG(i, all_CoG[i][0], all_CoG[i][1], x_half, y_half)
+            x, y = get_CoG(i, all_CoG[i][0], all_CoG[i][1], x_half1, x_half2, y_half)
             shifted_CoG.append((x , y ))
     #else:
     #    find_markers_template(corner_normed, template)
     else:
         all_CoG = obtain_CoG_moments_patch(all_patches)
         for i in range(len(all_CoG)):
-            shifted_CoG.append(get_CoG(i, all_CoG[i][0], all_CoG[i][1], x_half, y_half))
+            shifted_CoG.append(get_CoG(i, all_CoG[i][0], all_CoG[i][1], x_half1, x_half2, y_half))
     #print(shifted_CoG)
     return shifted_CoG
 
